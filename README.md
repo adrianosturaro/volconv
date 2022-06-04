@@ -17,7 +17,7 @@ pip install volder
 ```python
 from volder.volder import DerConverter
 
-der_conv = VolumeConverter(produto="Derivados")
+der_conv = DerConverterr()
 dens20 =  der_conv.dens20(temp_amostra=32.3, dens_amostra=0.8234)
 ```
 

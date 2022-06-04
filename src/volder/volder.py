@@ -7,7 +7,7 @@ from configparser import ConfigParser  # Ler o arquivo de configuração
 import ast
 import numpy as np
 import numpy.typing as npt
-from typing import cast, Any, Dict, Iterator, Optional
+from typing import cast, Dict, Optional
 from pydantic import BaseModel, validator  # Validação de dados
 from pydantic.fields import ModelField
 
@@ -29,21 +29,13 @@ class DerParametros:
         self.li_den = float(config["Derivados"]["li_den"])
         self.ls_den = float(config["Derivados"]["ls_den"])
 
-    @classmethod
-    def __get_validators__(cls) -> Iterator[Any]:
-        """Exigenvcia do pydantic.BaseModel"""
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, value: float, values: Dict[Any, Any]) -> float:
-        pass
-
 
 class DerConverter(BaseModel):
     """Classe para convesão de volume"""
 
     class Config:
         validate_assignment = True
+        arbitrary_types_allowed = True  # Por causa da classe DerParametros
 
     parametros: DerParametros = DerParametros()
     temp_amostra: Optional[float]
@@ -55,10 +47,6 @@ class DerConverter(BaseModel):
     def limite_temp(
         cls, value: float, values: Dict[str, DerParametros], field: ModelField
     ) -> float:
-        try:  # Tenta converter para float
-            value = float(value)
-        except TypeError:
-            raise TypeError(f"Impossível converter {field.name} para float")
         # Valida os limites da temperatura
         if value < values["parametros"].li_temp:
             raise ValueError(
@@ -77,20 +65,16 @@ class DerConverter(BaseModel):
     def limite_den(
         cls, value: float, values: Dict[str, DerParametros], field: ModelField
     ):
-        try:  # Tenta converter para float
-            value = float(value)
-        except TypeError:
-            raise TypeError(f"Impossível converter {field.name} para float")
         # Valida os limites da densidade
-        if value < values["parametros"].li_temp:
+        if value < values["parametros"].li_den:
             raise ValueError(
                 f"A desnsidade deve ser menor"
-                f" ou iguala a {values['parametros'].li_temp} g/cm³"
+                f" ou iguala a {values['parametros'].li_den} g/cm³"
             )
-        if value > values["parametros"].ls_temp:
+        if value > values["parametros"].ls_den:
             raise ValueError(
                 f"A densidade da amostra deve ser maior"
-                f" ou iguala a {values['parametros'].ls_temp} g/cm³"
+                f" ou iguala a {values['parametros'].ls_den} g/cm³"
             )
         return value
 
@@ -198,6 +182,8 @@ class DerConverter(BaseModel):
 
         self.temp_amostra = temp_amostra
         self.dens_amostra = dens_amostra
+        temp_amostra = self.temp_amostra
+        dens_amostra = self.dens_amostra
         # Calculo dos parâmetros do modelo
         p1_calc = self._p1_derivados(dens_amostra=dens_amostra)
         p2_calc = self._p2_derivados(dens_amostra=dens_amostra)
@@ -225,6 +211,9 @@ class DerConverter(BaseModel):
         self.temp_amostra = temp_amostra
         self.dens_amostra = dens_amostra
         self.temp_ct = temp_ct
+        temp_amostra = self.temp_amostra
+        dens_amostra = self.dens_amostra
+        temp_ct = self.temp_ct
 
         # Calculo dos parâmetros do modelo
         p1_calc = self._p1_derivados(dens_amostra=dens_amostra)
@@ -239,3 +228,6 @@ class DerConverter(BaseModel):
         result_par2 += p3_calc * pow((temp_ct - 20.0), 2)
         result_par2 /= self.dens20(dens_amostra=dens_amostra, temp_amostra=temp_amostra)
         return round(result_par1 + result_par2, 6)
+
+
+volcon = DerConverter()
