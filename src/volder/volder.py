@@ -4,12 +4,14 @@ de referência de derivados de petroleo
 """
 
 from configparser import ConfigParser  # Ler o arquivo de configuração
-import ast
+import ast  # Transformar literal em lista
 import numpy as np
 import numpy.typing as npt
 from typing import cast, Dict, Optional
 from pydantic import BaseModel, validator  # Validação de dados
 from pydantic.fields import ModelField
+
+__all__ = ['DerConverter']
 
 
 class DerParametros:
@@ -47,7 +49,7 @@ class DerConverter(BaseModel):
     def limite_temp(
         cls, value: float, values: Dict[str, DerParametros], field: ModelField
     ) -> float:
-        # Valida os limites da temperatura
+        """ Valida os limites da temperatura """
         if value < values["parametros"].li_temp:
             raise ValueError(
                 f"A {field.name} deve ser menor"
@@ -55,7 +57,7 @@ class DerConverter(BaseModel):
             )
         if value > values["parametros"].ls_temp:
             raise ValueError(
-                f"A {field.name}a deve ser maior"
+                f"A {field.name} deve ser maior"
                 f" ou iguala a {values['parametros'].ls_temp} °C"
             )
         return value
@@ -65,15 +67,15 @@ class DerConverter(BaseModel):
     def limite_den(
         cls, value: float, values: Dict[str, DerParametros], field: ModelField
     ):
-        # Valida os limites da densidade
+        """ Valida os limites da densidade """
         if value < values["parametros"].li_den:
             raise ValueError(
-                f"A desnsidade deve ser menor"
+                f"A {field.name} deve ser menor"
                 f" ou iguala a {values['parametros'].li_den} g/cm³"
             )
         if value > values["parametros"].ls_den:
             raise ValueError(
-                f"A densidade da amostra deve ser maior"
+                f"A {field.name} deve ser maior"
                 f" ou iguala a {values['parametros'].ls_den} g/cm³"
             )
         return value
@@ -91,6 +93,7 @@ class DerConverter(BaseModel):
     ) -> float:
         """Retorna o parametro do derivado da tabela em função da dens_amostra"""
 
+        # Usa o campo den_inf para filtrar as outras tabelas
         filtro1: np.bool8 = self.parametros.den_inf < dens_amostra
         filtro2: np.bool8 = self.parametros.den_sup >= dens_amostra
         filtro: np.bool8 = filtro1 & filtro2
@@ -180,10 +183,12 @@ class DerConverter(BaseModel):
     def dens20(self, temp_amostra: float, dens_amostra: float) -> float:
         """Retorna a densidade a 20 de derivados"""
 
+        # Dipara a validação
         self.temp_amostra = temp_amostra
         self.dens_amostra = dens_amostra
         temp_amostra = self.temp_amostra
         dens_amostra = self.dens_amostra
+
         # Calculo dos parâmetros do modelo
         p1_calc = self._p1_derivados(dens_amostra=dens_amostra)
         p2_calc = self._p2_derivados(dens_amostra=dens_amostra)
@@ -208,6 +213,7 @@ class DerConverter(BaseModel):
     ) -> float:
         """Retorna o fator de converssap de derivados"""
 
+        # Dipara a validação
         self.temp_amostra = temp_amostra
         self.dens_amostra = dens_amostra
         self.temp_ct = temp_ct
@@ -228,6 +234,3 @@ class DerConverter(BaseModel):
         result_par2 += p3_calc * pow((temp_ct - 20.0), 2)
         result_par2 /= self.dens20(dens_amostra=dens_amostra, temp_amostra=temp_amostra)
         return round(result_par1 + result_par2, 6)
-
-
-volcon = DerConverter()

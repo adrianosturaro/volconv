@@ -1,13 +1,13 @@
 from pydantic import ValidationError
 import pytest
-import volder.volder as vc
+from volder import DerConverter as dc  # type: ignore
 
 
 @pytest.mark.parametrize(
     "temp_amostra,dens_amostra,esperado", [(20, 0.83, 0.8300), (25, 0.83, 0.833354)]
 )
 def test_mult_volder_dens20(temp_amostra, dens_amostra, esperado):
-    volcon = vc.DerConverter()
+    volcon = dc()
     assert (
         volcon.dens20(temp_amostra=temp_amostra, dens_amostra=dens_amostra) == esperado
     )
@@ -18,7 +18,7 @@ def test_mult_volder_dens20(temp_amostra, dens_amostra, esperado):
     [(20, 0.83, 20, 1.000), (25, 0.83, 25, 0.995859)],
 )
 def test_mult_volder_fator(temp_amostra, dens_amostra, temp_ct, esperado):
-    volcon = vc.DerConverter()
+    volcon = dc()
     assert (
         volcon.fator(
             temp_amostra=temp_amostra, dens_amostra=dens_amostra, temp_ct=temp_ct
@@ -41,7 +41,7 @@ def test_mult_volder_fator(temp_amostra, dens_amostra, temp_ct, esperado):
     ],
 )
 def test_mult_invalid_volder_dens(temp_amostra, dens_amostra):
-    volcon = vc.DerConverter()
+    volcon = dc()
     with pytest.raises(ValidationError):
         volcon.dens20(temp_amostra=temp_amostra, dens_amostra=dens_amostra)
 
@@ -61,8 +61,7 @@ def test_mult_invalid_volder_dens(temp_amostra, dens_amostra):
     ],
 )
 def test_mult_invalid_volder_fator(temp_amostra, dens_amostra, temp_ct):
-    volcon = vc.DerConverter()
-    volcon.parametros = vc.DerParametros()
+    volcon = dc()
     with pytest.raises(ValidationError):
         volcon.fator(
             temp_amostra=temp_amostra, dens_amostra=dens_amostra, temp_ct=temp_ct
