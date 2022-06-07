@@ -4,7 +4,13 @@ from volder import DerConverter as dc  # type: ignore
 
 
 @pytest.mark.parametrize(
-    "temp_amostra,dens_amostra,esperado", [(20, 0.83, 0.8300), (25, 0.83, 0.833354)]
+    "temp_amostra,dens_amostra,esperado",
+    [
+        (20, 0.83, 0.8300),
+        (25, 0.83, 0.833354),
+        ("20", 0.83, 0.8300),
+        (20, "0.83", 0.8300),
+    ],
 )
 def test_mult_volder_dens20(temp_amostra, dens_amostra, esperado):
     volcon = dc()
@@ -15,7 +21,13 @@ def test_mult_volder_dens20(temp_amostra, dens_amostra, esperado):
 
 @pytest.mark.parametrize(
     "temp_amostra,dens_amostra,temp_ct,esperado",
-    [(20, 0.83, 20, 1.000), (25, 0.83, 25, 0.995859)],
+    [
+        (20, 0.83, 20, 1.000),
+        (25, 0.83, 25, 0.995859),
+        ("20", 0.83, 20, 1.000),
+        (20, "0.83", 20, 1.000),
+        (20, 0.83, "20", 1.000),
+    ],
 )
 def test_mult_volder_fator(temp_amostra, dens_amostra, temp_ct, esperado):
     volcon = dc()

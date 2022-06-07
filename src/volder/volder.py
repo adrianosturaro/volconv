@@ -10,8 +10,9 @@ import numpy.typing as npt
 from typing import cast, Dict, Optional
 from pydantic import BaseModel, validator  # Validação de dados
 from pydantic.fields import ModelField
+import os.path
 
-__all__ = ['DerConverter']
+__all__ = ["DerConverter"]
 
 
 class DerParametros:
@@ -19,7 +20,9 @@ class DerParametros:
 
     def __init__(self) -> None:
         config = ConfigParser()
-        config.read(f"{__file__[:-9]}config_parameters.ini")
+        config.read(
+            f"{os.path.dirname(os.path.abspath(__file__))}\\config_parameters.ini"
+        )
         self.den_inf = np.array(ast.literal_eval(config["Derivados"]["den_inf"]))
         self.den_sup = np.array(ast.literal_eval(config["Derivados"]["den_sup"]))
         self.tab1a = np.array(ast.literal_eval(config["Derivados"]["tab1a"]))
@@ -49,15 +52,15 @@ class DerConverter(BaseModel):
     def limite_temp(
         cls, value: float, values: Dict[str, DerParametros], field: ModelField
     ) -> float:
-        """ Valida os limites da temperatura """
+        """Valida os limites da temperatura"""
         if value < values["parametros"].li_temp:
             raise ValueError(
-                f"A {field.name} deve ser menor"
+                f"A {field.name} deve ser maior"
                 f" ou iguala a {values['parametros'].li_temp} °C"
             )
         if value > values["parametros"].ls_temp:
             raise ValueError(
-                f"A {field.name} deve ser maior"
+                f"A {field.name} deve ser menor"
                 f" ou iguala a {values['parametros'].ls_temp} °C"
             )
         return value
@@ -67,15 +70,15 @@ class DerConverter(BaseModel):
     def limite_den(
         cls, value: float, values: Dict[str, DerParametros], field: ModelField
     ):
-        """ Valida os limites da densidade """
+        """Valida os limites da densidade"""
         if value < values["parametros"].li_den:
             raise ValueError(
-                f"A {field.name} deve ser menor"
+                f"A {field.name} deve ser maior"
                 f" ou iguala a {values['parametros'].li_den} g/cm³"
             )
         if value > values["parametros"].ls_den:
             raise ValueError(
-                f"A {field.name} deve ser maior"
+                f"A {field.name} deve ser menor"
                 f" ou iguala a {values['parametros'].ls_den} g/cm³"
             )
         return value

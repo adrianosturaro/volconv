@@ -1,4 +1,4 @@
-# volcon
+# volder
 
 Este é um pacote usado para converssão de volume de derivados de petróleo
 
@@ -15,9 +15,9 @@ pip install volder
 ## Uso
 
 ```python
-from volder.volder import DerConverter
+from volder import DerConverter
 
-der_conv = DerConverterr()
+der_conv = DerConverter()
 dens20 =  der_conv.dens20(temp_amostra=32.3, dens_amostra=0.8234)
 ```
 
