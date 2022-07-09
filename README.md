@@ -6,7 +6,7 @@ Este pacote tem um proposito academico, assim não deve ser usados para converss
 
 ## Instalação
 
-Execute o seguinte para instlar:
+Execute o seguinte comando para instalar:
 
 ```python
 pip install volder
